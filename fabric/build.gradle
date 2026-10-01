@@ -1,0 +1,100 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.fabricmc.fabric-loom'
+}
+
+def protocolVersion = protocols_use_local_build == "true" ? protocols_local_version : protocols_version
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    implementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
+    api("me.shedaniel.cloth:cloth-config-fabric:${clothconfig_version}")
+
+    implementation("com.github.NiFeather:feathermorph-protocols:$protocolVersion")
+    implementation("me.shedaniel.cloth:cloth-config-fabric:${clothconfig_version}")
+    api("com.terraformersmc:modmenu:${modmenu_version}")
+
+    implementation("com.github.NiFeather:feathermorph-command-compat-layer:${compat_layer_version}")
+    include("com.github.NiFeather:feathermorph-command-compat-layer:${compat_layer_version}")
+
+    include("com.github.NiFeather:feathermorph-protocols:${protocolVersion}")
+}
+
+loom {
+    def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
+    mixin {
+        defaultRefmapName.set("${mod_id}.refmap.json")
+    }
+    runs {
+        client {
+            client()
+            setConfigName('Fabric Client')
+            ideConfigGenerated(true)
+            runDir('runs/client')
+        }
+        server {
+            server()
+            setConfigName('Fabric Server')
+            ideConfigGenerated(true)
+            runDir('runs/server')
+        }
+    }
+}
+
+// 构建完成后自动把 jar 覆盖安装到客户端实例的 mods 目录。
+// 目标路径由 gradle.properties 的 deploy_mods_dir 指定（留空即关闭该行为）。
+def deployModsDir = (project.findProperty('deploy_mods_dir') ?: '').toString().trim()
+
+tasks.register('deployToInstance') {
+    group = 'build'
+    description = '将构建产物覆盖安装到客户端实例的 mods 目录（deploy_mods_dir 留空则跳过）'
+    dependsOn tasks.named('assemble')
+
+    doLast {
+        if (deployModsDir.isEmpty()) {
+            logger.lifecycle('deploy_mods_dir 未配置，跳过自动部署')
+            return
+        }
+
+        def targetDir = file(deployModsDir)
+        if (!targetDir.parentFile?.exists()) {
+            throw new GradleException("自动部署失败：目标实例目录不存在 -> ${targetDir.parentFile}")
+        }
+        targetDir.mkdirs()
+
+        def builtJar = tasks.named('jar').get().archiveFile.get().asFile
+        if (!builtJar.exists()) {
+            throw new GradleException("自动部署失败：找不到构建产物 ${builtJar}")
+        }
+
+        // 先清掉旧的同前缀产物（保留 sources jar），避免新旧 jar 同时被加载
+        def removed = []
+        targetDir.listFiles()?.sort { it.name }?.each { f ->
+            if (f.isFile()
+                    && f.name.startsWith(mod_id)
+                    && f.name.endsWith('.jar')
+                    && !f.name.contains('-sources')) {
+                if (!f.delete()) {
+                    throw new GradleException("自动部署失败：无法删除旧模组 ${f.name} —— 游戏可能正在运行，请关闭 Minecraft 后重新构建")
+                }
+                removed << f.name
+            }
+        }
+
+        copy {
+            from builtJar
+            into targetDir
+        }
+
+        logger.lifecycle("已部署 ${builtJar.name} -> ${targetDir}" +
+                (removed.isEmpty() ? '' : "（清理旧文件: ${removed.join(', ')}）"))
+    }
+}
+
+tasks.named('build') {
+    finalizedBy 'deployToInstance'
+}
