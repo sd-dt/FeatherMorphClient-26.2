@@ -49,7 +49,7 @@ public class ModelWorkarounds
 
     public void initWorkarounds()
     {
-        LoggerFactory.getLogger("morph").info("Initializing arm render workarounds");
+        LoggerFactory.getLogger("morph").debug("Initializing arm render workarounds");
         workarounds.clear();
 
         //No-op

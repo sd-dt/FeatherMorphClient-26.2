@@ -38,7 +38,7 @@ public final class KappaCapeProvider implements ICapeProvider
 
         thread.setUncaughtExceptionHandler((t, error) ->
         {
-            log.info("Error occurred in thread '%s': %s".formatted(t.getName(), error.getMessage()));
+            log.warn("Error occurred in thread '%s': %s".formatted(t.getName(), error.getMessage()));
             error.printStackTrace();
         });
 
@@ -147,7 +147,7 @@ public final class KappaCapeProvider implements ICapeProvider
         }
         catch (Throwable t)
         {
-            log.info("Error occurred while fetching/processing cape: " + t.getMessage());
+            log.warn("Error occurred while fetching/processing cape: " + t.getMessage());
             t.printStackTrace();
             return null;
         }

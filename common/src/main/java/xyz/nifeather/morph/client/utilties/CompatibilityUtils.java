@@ -19,7 +19,7 @@ public class CompatibilityUtils
     {
         if (Services.PLATFORM.isModPresent("entityculling"))
         {
-            FeatherMorphClientBootstrap.LOGGER.info("Found mod named %s, enabling compatibility handler...".formatted(modid));
+            FeatherMorphClientBootstrap.LOGGER.debug("Found mod named %s, enabling compatibility handler...".formatted(modid));
             runnable.run();
         }
     }

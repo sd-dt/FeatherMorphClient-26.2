@@ -207,7 +207,7 @@ public class ClientMorphManager extends MorphClientObject
         if (this.localPlayerSyncer == null)
             return;
 
-        logger.info("Removing previous syncer " + localPlayerSyncer);
+        logger.debug("Removing previous syncer " + localPlayerSyncer);
         instanceTracker.removeSyncer(localPlayerSyncer);
         localPlayerSyncer.dispose();
         localPlayerSyncer = null;
@@ -477,7 +477,6 @@ public class ClientMorphManager extends MorphClientObject
         else
         {
             logger.warn("Calling UpdateSkin while localPlayerSyncer is null!");
-            Thread.dumpStack();
         }
     }
 

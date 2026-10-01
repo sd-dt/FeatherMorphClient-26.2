@@ -57,14 +57,14 @@ public class LegacyServerHandler
         var v2Handle = V2ProtocolHandler.INSTANCE.handleInitializeRespond(payload);
         if (v2Handle.apiVersion() != -1) // -1: 没有检测到新协议的标识
         {
-            FeatherMorphClientBootstrap.LOGGER.info("Server is using V2 packets");
+            FeatherMorphClientBootstrap.LOGGER.debug("Server is using V2 packets");
 
             serverHandler.setProtocolHandler(V2ProtocolHandler.INSTANCE);
             V2ProtocolHandler.INSTANCE.sendVersion(Constants.ApiLevel.ANIMATION.protocolVersion);
             return;
         }
 
-        FeatherMorphClientBootstrap.LOGGER.info("Server is possibly using V1 packets");
+        FeatherMorphClientBootstrap.LOGGER.debug("Server is possibly using V1 packets");
         serverHandler.setProtocolHandler(V1ProtocolHandler.INSTANCE);
         V1ProtocolHandler.INSTANCE.sendVersion(Constants.ApiLevel.ANIMATION.protocolVersion);
     }

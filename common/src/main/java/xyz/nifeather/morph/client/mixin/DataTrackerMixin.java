@@ -33,9 +33,9 @@ public class DataTrackerMixin
     @Unique
     private void morphclient$dumpEntries(List<SynchedEntityData.DataValue<?>> entries)
     {
-        FeatherMorphClientBootstrap.LOGGER.info("- x - x - x - Entries - x - x - x -");
+        FeatherMorphClientBootstrap.LOGGER.debug("- x - x - x - Entries - x - x - x -");
         for (SynchedEntityData.DataValue<?> entry : entries)
-            FeatherMorphClientBootstrap.LOGGER.info("ID '%s' -> VALUE '%s'".formatted(entry.id(), entry.value()));
-        FeatherMorphClientBootstrap.LOGGER.info("- x - x - x - Entries - x - x - x -");
+            FeatherMorphClientBootstrap.LOGGER.debug("ID '%s' -> VALUE '%s'".formatted(entry.id(), entry.value()));
+        FeatherMorphClientBootstrap.LOGGER.debug("- x - x - x - Entries - x - x - x -");
     }
 }
