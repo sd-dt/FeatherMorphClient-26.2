@@ -1,0 +1,145 @@
+package xyz.nifeather.morph.client.graphics.hud;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.math.Color;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
+import xyz.nifeather.morph.client.ClientMorphManager;
+import xyz.nifeather.morph.client.MorphClientObject;
+import xyz.nifeather.morph.client.graphics.color.ColorUtils;
+import xyz.nifeather.morph.client.graphics.color.MaterialColors;
+import xyz.nifeather.morph.client.graphics.transforms.Recorder;
+import xyz.nifeather.morph.client.graphics.transforms.Transformer;
+import xyz.nifeather.morph.client.graphics.transforms.easings.Easing;
+
+public class HudRenderHelper extends MorphClientObject
+{
+    @Resolved
+    private ClientMorphManager manager;
+
+    private final Bindable<Float> revValueNext = new Bindable<>(0f);
+    private final Recorder<Float> revDisplayRecorder = new Recorder<>(0f);
+    private final Recorder<Float> progressHeightRecorder = new Recorder<>(0f);
+    private final Recorder<Float> barHeightRecorder = new Recorder<>(0f);
+
+    private final Recorder<Color> colorRecord = new Recorder<>(Color.ofOpaque(0));
+    private final Bindable<Color> colorNext = new Bindable<>(Color.ofOpaque(0));
+
+    private final Recorder<Float> drawAlpha = new Recorder<>(0f);
+
+    private final Bindable<Color> preferredBgColor = new Bindable<>(Color.ofOpaque(0));
+    private final Recorder<Color> bgColorRecord = new Recorder<>(Color.ofOpaque(0));
+
+    private final Bindable<Boolean> visible = new Bindable<>(false);
+
+    @Initializer
+    private void load()
+    {
+        revValueNext.bindTo(manager.revealingValue);
+
+        colorNext.onValueChanged((o, n) ->
+        {
+            if (o == null) o = MaterialColors.Indigo500;
+
+            if (!n.equals(o))
+                Transformer.transform(colorRecord, n, visible.get() ? 1500 : 0, Easing.OutQuint);
+        }, true);
+
+        revValueNext.onValueChanged((o, n) ->
+        {
+            Transformer.transform(revDisplayRecorder, n, visible.get() ? 2000 : 0, Easing.OutQuint);
+        }, true);
+
+        preferredBgColor.onValueChanged((o, n) ->
+        {
+            if (o == null) o = MaterialColors.Indigo500;
+
+            if (!n.equals(o))
+                Transformer.transform(bgColorRecord, n, visible.get() ? 1500 : 0, Easing.OutQuint);
+        }, true);
+
+        visible.onValueChanged((o, n) ->
+        {
+            // Bar进度
+            Transformer.transform(progressHeightRecorder, n ? 0f : -2.5f, 650, Easing.InOutQuint);
+
+            // Bar位置
+            Transformer.transform(barHeightRecorder, n ? 0f : -6f, 650, Easing.OutBack);
+
+            Transformer.transform(drawAlpha, n ? 1 : 0f, 650, Easing.OutQuint);
+        }, true);
+
+        this.addSchedule(this::update);
+    }
+
+    private void update()
+    {
+        this.addSchedule(this::update);
+
+        //if (plugin.getCurrentTick() % 40 == 0)
+        //    revValueNext.set(revValueNext.get() > 0f ? 0f : new Random().nextFloat(10, 100));
+
+        var rev = revDisplayRecorder.get();
+
+        var targetClr = (rev >= 20)
+                ? (rev >= 80 ? MaterialColors.Red600 : MaterialColors.Orange500)
+                : MaterialColors.Green400;
+
+        colorNext.set(targetClr);
+        preferredBgColor.set(targetClr.darker(3f));
+
+        visible.set(rev > 0.1f);
+    }
+
+    public void onRender(GuiGraphicsExtractor context, DeltaTracker renderTickCounter)
+    {
+        if (manager == null || drawAlpha.get() == 0f || Minecraft.getInstance().gui.hud.isHidden()) return;
+
+        var matrices = context.pose();
+
+        try
+        {
+            matrices.pushMatrix();
+            renderBar(context, renderTickCounter);
+        }
+        finally
+        {
+            matrices.popMatrix();
+        }
+    }
+
+    public void renderBar(GuiGraphicsExtractor context, DeltaTracker renderTickCounter)
+    {
+        // 10 * 0.8
+        var width = 8;
+
+        // 35 * 0.8
+        var height = 28;
+        var padding = 1;
+
+        var windowHeight = context.guiHeight();
+        var matrices = context.pose();
+
+        var backgroundColor = ColorUtils.forOpacity(bgColorRecord.get(), drawAlpha.get());
+        var contentColor = ColorUtils.forOpacity(colorRecord.get(), drawAlpha.get()).getColor();
+
+        // 先位移到屏幕外面
+        // 然后再位移到屏幕里面
+        var offsetX = barHeightRecorder.get() + 2;
+        var offsetY = windowHeight - height - 2;
+        matrices.translate(offsetX, offsetY, matrices);
+
+        // 填充背景
+        //bug: GuiGraphicsExtractor#submitOutline only works in screens
+        context.fill(0, 0, width, height, backgroundColor.darker(1.3).getColor());
+
+        // 填充进度
+        var barStart = padding + Math.round((height - padding * 2) * (revDisplayRecorder.get() / 100));
+        var barEnd = height - padding;
+        context.fill(padding, barStart, width - padding, barEnd, contentColor);
+    }
+}
