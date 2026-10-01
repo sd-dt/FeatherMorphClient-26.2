@@ -414,7 +414,6 @@ public abstract class DisguiseSyncer extends MorphClientObject
         if (disposed.get())
         {
             logger.warn("Trying to update skin for a disposed DisguiseSyncer " + this);
-            Thread.dumpStack();
             return;
         }
 
@@ -535,13 +534,12 @@ public abstract class DisguiseSyncer extends MorphClientObject
         if (this.disposed())
         {
             logger.warn("Trying to update a disposed DisguiseSyncer(%s)!".formatted(this));
-            Thread.dumpStack();
             return;
         }
 
         if (bindingPlayer.isRemoved() || bindingPlayer.level() != Minecraft.getInstance().level)
         {
-            logger.info(this + " Player removed, scheduling syncer dispose");
+            logger.debug(this + " Player removed, scheduling syncer dispose");
             this.addSchedule(this::dispose);
             return;
         }
@@ -555,7 +553,7 @@ public abstract class DisguiseSyncer extends MorphClientObject
 
             if (prev != null)
             {
-                logger.info(this + " World changed, scheduling syncer dispose");
+                logger.debug(this + " World changed, scheduling syncer dispose");
                 addSchedule(this::dispose);
             }
 
@@ -564,7 +562,7 @@ public abstract class DisguiseSyncer extends MorphClientObject
 
         if (disguiseInstance.isRemoved())
         {
-            logger.info(this + " Instance removed, scheduling syncer dispose");
+            logger.debug(this + " Instance removed, scheduling syncer dispose");
             addSchedule(this::dispose);
             return;
         }

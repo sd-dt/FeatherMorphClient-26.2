@@ -34,7 +34,7 @@ public class BufferUtils
         }
         catch (Throwable t)
         {
-            LOGGER.info("Can't read buffer with readUtf(), returning empty...");
+            LOGGER.warn("Can't read buffer with readUtf(), returning empty...");
             return "";
         }
     }

@@ -137,7 +137,7 @@ public class ServerHandler extends MorphClientObject implements BasicServerHandl
 
     public void setProtocolHandler(IProtocolHandler newHandler)
     {
-        logger.info("ProtocolHandler set to " + newHandler.getClass().getSimpleName());
+        logger.debug("ProtocolHandler set to " + newHandler.getClass().getSimpleName());
         this.protocolHandler = newHandler;
     }
 
@@ -278,7 +278,7 @@ public class ServerHandler extends MorphClientObject implements BasicServerHandl
         {
             logPacket(false, SharedValues.initializeChannelV3, payload.message());
 
-            logger.info("Server is using V3 packets");
+            logger.debug("Server is using V3 packets");
             var respond = protocolHandler.handleInitializeRespond(payload);
             this.handleServerInitRespond(respond);
         });
@@ -302,12 +302,11 @@ public class ServerHandler extends MorphClientObject implements BasicServerHandl
         if (serverReady.get())
         {
             logger.warn("Received init respond while the server is ready?!");
-            Thread.dumpStack();
             return;
         }
 
         serverVersion = respond.apiVersion();
-        logger.info("Server is using command API V" + serverVersion);
+        logger.debug("Server is using command API V" + serverVersion);
 
         serverReady.set(true);
 
@@ -439,7 +438,7 @@ public class ServerHandler extends MorphClientObject implements BasicServerHandl
     {
         if (serverVersion >= Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
-            logger.info("Ignoring %s as the server support a newer protocol".formatted(s2CSetEquipCommand.getClass().getSimpleName()));
+            logger.debug("Ignoring %s as the server support a newer protocol".formatted(s2CSetEquipCommand.getClass().getSimpleName()));
             return;
         }
 
@@ -463,7 +462,7 @@ public class ServerHandler extends MorphClientObject implements BasicServerHandl
     {
         if (serverVersion >= Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
-            logger.info("Ignoring %s as the server support a newer protocol".formatted(s2CSetFakeEquipCommand.getClass().getSimpleName()));
+            logger.debug("Ignoring %s as the server support a newer protocol".formatted(s2CSetFakeEquipCommand.getClass().getSimpleName()));
             return;
         }
 
@@ -486,7 +485,7 @@ public class ServerHandler extends MorphClientObject implements BasicServerHandl
     {
         if (serverVersion >= Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
-            logger.info("Ignoring %s as the server support a newer protocol".formatted(s2CSetProfileCommand.getClass().getSimpleName()));
+            logger.debug("Ignoring %s as the server support a newer protocol".formatted(s2CSetProfileCommand.getClass().getSimpleName()));
             return;
         }
 

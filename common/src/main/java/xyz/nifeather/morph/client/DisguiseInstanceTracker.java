@@ -195,7 +195,6 @@ public class DisguiseInstanceTracker extends MorphClientObject
         else
         {
             logger.warn("Trying to remove an DisguiseSyncer that is not in the list?!");
-            Thread.dumpStack();
         }
     }
 

@@ -59,8 +59,8 @@ public class FeatherMorphCommonBootstrap
             morphServerLoader.onModLoad();
 
             // 注册指令
-            MorphServerLoader.LOGGER.info("Register argument types...");
-            MorphServerLoader.LOGGER.info("Sadly, we can't register these at runtime.");
+            MorphServerLoader.LOGGER.debug("Register argument types...");
+            MorphServerLoader.LOGGER.debug("Sadly, we can't register these at runtime.");
 
             Services.PLATFORM.registerArgumentType(Identifier.parse("feathermorph:relaxed_string"),
                     RelaxedStringArgumentType.class,

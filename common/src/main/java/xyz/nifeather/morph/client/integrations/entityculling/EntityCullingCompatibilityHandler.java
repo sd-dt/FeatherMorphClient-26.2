@@ -30,6 +30,6 @@ public class EntityCullingCompatibilityHandler
             return shouldSkipThisCull;
         });
 
-        FeatherMorphClientBootstrap.LOGGER.info("OK Added dynamic entity whitelist rule.");
+        FeatherMorphClientBootstrap.LOGGER.debug("OK Added dynamic entity whitelist rule.");
     }
 }

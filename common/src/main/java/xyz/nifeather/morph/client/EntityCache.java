@@ -267,7 +267,7 @@ public class EntityCache
 
         //living.setPos(0, -4096, 0);
         if (identifier.startsWith("player:"))
-            LoggerFactory.getLogger("morph").info("Pushing " + identifier + " into EntityCache.");
+            LoggerFactory.getLogger("morph").debug("Pushing " + identifier + " into EntityCache.");
 
         return spawnedEntity;
     }
